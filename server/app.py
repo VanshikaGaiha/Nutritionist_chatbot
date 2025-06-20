@@ -52,4 +52,4 @@ Use emojis where it makes sense. Be helpful and encouraging.
 
 
 if __name__ == "__main__":
-    app.run(port=int(os.getenv("PORT", 5000)), debug=True)
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)
