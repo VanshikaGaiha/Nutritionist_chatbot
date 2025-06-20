@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: nutritionist-backend
+    env: python
+    plan: free
+    buildCommand: ""
+    startCommand: gunicorn app:app
+    envVars:
+      - key: GEMINI_API_KEY
+        value: AIzaSyAaIzGlq0c9mgH0qxk3f5W1ZDHWdbvVx3M
+    buildFilter:
+      paths:
+        - server/**
+    rootDir: server
