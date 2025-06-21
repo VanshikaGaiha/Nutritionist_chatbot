@@ -4,10 +4,10 @@ from flask_cors import CORS
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load .env
 load_dotenv()
 
-# Flask app setup
+# Setup Flask app
 app = Flask(__name__)
 CORS(app)
 
@@ -26,33 +26,27 @@ def analyze():
     user_msg = data.get("message", "")
     history = data.get("history", [])
 
-    # Build conversation history as text
-    formatted_history = ""
-    for turn in history:
-        if turn["sender"] == "user":
-            formatted_history += f"User: {turn['text']}\n"
-        else:
-            formatted_history += f"AI: {turn['text']}\n"
+    # Format conversation history for context
+    formatted_history = "\n".join([f"{msg['sender'].capitalize()}: {msg['text']}" for msg in history])
 
     prompt = f"""
-You are a warm, helpful AI Nutritionist in a chat conversation. Use the full chat history below to understand context and provide helpful responses. Focus on micronutrient deficiencies and natural dietary solutions. Introduce the concept of biofortification **only if relevant to the user's concern or question**, not randomly.
+You are an AI Nutritionist assistant chatting with a user in a casual, friendly way.
 
-Chat History:
+Here is the conversation so far:
 {formatted_history}
 User: {user_msg}
 
-Respond with:
-• A friendly opening.
-• Up to 3 micronutrient deficiencies related to the symptoms (with explanations).
-• A simple, clear explanation of biofortification only if appropriate.
-• 2–3 Indian food suggestions as remedies (with reasons).
-• One practical tip or lifestyle advice.
-Avoid markdown. Use line breaks and emojis where useful. Be natural and conversational.
+Your job:
+- Respond naturally like a person would in an ongoing chat.
+- If the user asks a follow-up (like \"sure\", \"what else\", or \"am I eating wrong?\"), build on what you said before.
+- If the user is showing interest in their diet, ask clarifying questions or offer personalized advice.
+- ONLY repeat explanations like deficiencies or biofortification if they haven’t been explained yet.
+
+Keep responses short, friendly, and feel like a back-and-forth conversation. Use emojis where it fits, avoid repeating full explanations again.
 """
 
     response = model.generate_content(prompt)
     clean_text = response.text.strip().replace("*", "").replace("\n\n", "\n")
-
     return jsonify({"response": clean_text})
 
 if __name__ == "__main__":
