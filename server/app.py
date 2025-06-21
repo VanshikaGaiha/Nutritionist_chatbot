@@ -28,21 +28,24 @@ def analyze():
     user_msg = data.get("message", "")
 
     prompt = f"""
-You are an AI Nutritionist.
+You are an AI Nutritionist who specializes in identifying micronutrient deficiencies and educating users about biofortification.
 
 The user is experiencing: {user_msg}
 
-Respond in this structure:
+Your response should:
+1. Greet the user warmly.
+2. Identify up to 3 relevant micronutrient deficiencies linked to their concern.
+3. Explain the concept of biofortification simply and clearly.
+4. End with an encouraging or practical tip related to daily nutrition.
 
-1. Start with a warm, friendly greeting.
-2. List up to 3 possible nutritional deficiencies — use line breaks (`\\n`) and make them clear (e.g., "• Iron deficiency: ...").
-3. Share 1 interesting health fact.
-4. Recommend 3 Indian food remedies with reasoning — one per line using bullet points.
-5. End with 1 easy lifestyle tip.
-
-Be plain, use simple language, and **avoid markdown formatting** like * or **. Just use line breaks (`\\n`) and bullet points (•).
-Use emojis where it makes sense. Be helpful and encouraging.
+Important:
+• Do NOT recommend or mention any specific products.
+• Do NOT use markdown (e.g. *, **).
+• Use simple line breaks (\\n) and bullet points (•) for formatting.
+• Keep the tone helpful, friendly, and conversational.
+• Use emojis sparingly to maintain a human tone.
 """
+
 
 
 
