@@ -6,7 +6,7 @@
 }
 body {
   font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3D5C45 0%, #ffffff 100%);
   min-height: 100vh;
   color: #333;
 }
@@ -26,7 +26,7 @@ body {
 .header-content h1 {
   font-size: 2rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3D5C45 0%, #5B8C5A 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -111,7 +111,7 @@ body {
   line-height: 1.5;
 }
 .user-message .message-content {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3D5C45 0%, #5B8C5A 100%);
   color: white;
   border-bottom-right-radius: 4px;
 }
@@ -158,9 +158,9 @@ body {
   transition: all 0.2s ease;
 }
 .input-wrapper:focus-within {
-  border-color: #667eea;
+  border-color: #3D5C45;
   background: white;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 3px rgba(61, 92, 69, 0.1);
 }
 .message-input {
   flex: 1;
@@ -179,7 +179,7 @@ body {
 
 /* Send Button */
 .send-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3D5C45 0%, #5B8C5A 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -194,7 +194,7 @@ body {
 }
 .send-button:hover:not(.disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(61, 92, 69, 0.4);
 }
 .send-button.disabled {
   opacity: 0.5;
@@ -209,7 +209,7 @@ body {
   width: 16px;
   height: 16px;
   border: 2px solid #f3f3f3;
-  border-top: 2px solid #667eea;
+  border-top: 2px solid #3D5C45;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

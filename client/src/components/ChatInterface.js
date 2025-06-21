@@ -22,42 +22,45 @@ const ChatInterface = () => {
   }, [messages]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!inputValue.trim() || isLoading) return;
+  e.preventDefault();
+  if (!inputValue.trim() || isLoading) return;
 
-    const userMessage = {
-      id: Date.now(),
-      text: inputValue.trim(),
-      sender: 'user',
+  const userMessage = {
+    id: Date.now(),
+    text: inputValue.trim(),
+    sender: 'user',
+    timestamp: new Date()
+  };
+
+  setMessages(prev => [...prev, userMessage]);
+  setInputValue('');
+  setIsLoading(true);
+
+  try {
+    const history = [...messages, userMessage].map(({ sender, text }) => ({ sender, text }));
+    const response = await sendMessage(userMessage.text, history);
+    const aiMessage = {
+      id: Date.now() + 1,
+      text: response.response,
+      sender: 'ai',
       timestamp: new Date()
     };
+    setMessages(prev => [...prev, aiMessage]);
+  } catch (error) {
+    setMessages(prev => [...prev, {
+      id: Date.now() + 1,
+      text: "Sorry! I'm having trouble reaching the server.",
+      sender: 'ai',
+      isError: true,
+      timestamp: new Date()
+    }]);
+  } finally {
+    setIsLoading(false);
+    setTimeout(() => inputRef.current?.focus(), 100);
+  }
+};
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
-    setIsLoading(true);
 
-    try {
-      const response = await sendMessage(inputValue.trim());
-      const aiMessage = {
-        id: Date.now() + 1,
-        text: response.response,
-        sender: 'ai',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, aiMessage]);
-    } catch (error) {
-      setMessages(prev => [...prev, {
-        id: Date.now() + 1,
-        text: "Sorry! I'm having trouble reaching the nutrition server. Try again later.",
-        sender: 'ai',
-        isError: true,
-        timestamp: new Date()
-      }]);
-    } finally {
-      setIsLoading(false);
-      setTimeout(() => inputRef.current?.focus(), 100);
-    }
-  };
 
   return (
     <div className="chat-interface">
