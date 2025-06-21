@@ -4,14 +4,14 @@ from flask_cors import CORS
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-# Load .env
+# Load environment variables
 load_dotenv()
 
 # Setup Flask app
 app = Flask(__name__)
 CORS(app)
 
-# Gemini API setup
+# Configure Gemini API
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel('models/gemini-1.5-flash')
@@ -26,23 +26,27 @@ def analyze():
     user_msg = data.get("message", "")
     history = data.get("history", [])
 
-    # Format conversation history for context
-    formatted_history = "\n".join([f"{msg['sender'].capitalize()}: {msg['text']}" for msg in history])
+    formatted_history = "\n".join([f"{m['sender'].capitalize()}: {m['text']}" for m in history])
 
     prompt = f"""
-You are an AI Nutritionist assistant chatting with a user in a casual, friendly way.
+You are an AI Nutritionist chatbot helping users understand their symptoms through the lens of micronutrient deficiencies and biofortification.
 
-Here is the conversation so far:
+Conversation so far:
 {formatted_history}
-User: {user_msg}
+User just said: "{user_msg}"
 
-Your job:
-- Respond naturally like a person would in an ongoing chat.
-- If the user asks a follow-up (like \"sure\", \"what else\", or \"am I eating wrong?\"), build on what you said before.
-- If the user is showing interest in their diet, ask clarifying questions or offer personalized advice.
-- ONLY repeat explanations like deficiencies or biofortification if they haven’t been explained yet.
+Now generate the AI's reply.
 
-Keep responses short, friendly, and feel like a back-and-forth conversation. Use emojis where it fits, avoid repeating full explanations again.
+Guidelines:
+1. If this is the user's first message (no prior history), start with a friendly greeting.
+2. Otherwise, skip the greeting and respond in a flowing, conversational tone.
+3. Always aim to guide the conversation toward identifying possible micronutrient deficiencies (e.g., iron, vitamin B12, vitamin D, zinc, magnesium).
+4. Introduce the concept of biofortification *organically* — only if it fits naturally based on the user’s message or your previous response.
+5. Recommend helpful Indian food sources to manage such deficiencies.
+6. End with an encouraging nudge to keep chatting — like "Want to explore your diet a bit more?" or "Tell me what you usually eat in a day."
+7. Avoid repeating the same facts too soon — stay human, keep it engaging.
+
+Keep the language warm, friendly, and simple. Use emojis where appropriate. Do NOT use markdown or special formatting.
 """
 
     response = model.generate_content(prompt)
