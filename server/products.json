@@ -1,82 +1,50 @@
 [
   {
-    "name": "Biofortified Rice & Atta Combo",
-    "weight": "2kg Each",
-    "category": ["rice", "atta"],
-    "micronutrients": ["iron", "zinc", "protein"],
-    "description": "A powerful daily duo: biofortified rice and atta packed with iron, zinc, and protein.",
-    "keywords": ["combo", "daily staple", "roti", "biofortified"]
+    "name": "Biofortified Rice",
+    "weight": "2kg",
+    "type": "rice",
+    "benefits": "Rich in iron and zinc to combat fatigue and support immune health."
   },
   {
-    "name": "Biofortified Broken Wheat",
-    "weight": "1KG",
-    "category": ["broken wheat", "daliya"],
-    "micronutrients": ["iron", "fiber"],
-    "description": "A lighter option with natural iron and fiber for better digestion and energy.",
-    "keywords": ["broken wheat", "biofortified", "fiber", "digestion"]
+    "name": "Biofortified Wheat Flour",
+    "weight": "2kg",
+    "type": "atta",
+    "benefits": "Naturally higher in iron and protein for sustained energy and muscle repair."
+  },
+  {
+    "name": "Biofortified Wheat Flour",
+    "weight": "5kg",
+    "type": "atta",
+    "benefits": "Good for families looking to boost daily iron and zinc intake easily."
+  },
+  {
+    "name": "Biofortified Broken Wheat (Daliya)",
+    "weight": "1kg",
+    "type": "daliya",
+    "benefits": "Great source of fiber, iron, and magnesium for digestion and energy."
   },
   {
     "name": "Biofortified Daliya",
-    "weight": "1KG",
-    "category": ["daliya"],
-    "micronutrients": ["iron", "zinc"],
-    "description": "Wholesome and energizing – packed with essential minerals for daily strength.",
-    "keywords": ["daliya", "biofortified", "energy", "breakfast"]
+    "weight": "1kg",
+    "type": "daliya",
+    "benefits": "Provides long-lasting energy and supports gut health naturally."
   },
   {
-    "name": "Biofortified Rice",
-    "weight": "2KG",
-    "category": ["rice"],
-    "micronutrients": ["iron"],
-    "description": "Helps combat hidden hunger by boosting iron intake through everyday rice.",
-    "keywords": ["rice", "biofortified", "iron deficiency"]
+    "name": "Daliya Product",
+    "weight": "2kg",
+    "type": "daliya",
+    "benefits": "A staple for micronutrient-rich, easy-to-digest meals."
   },
   {
-    "name": "Biofortified Wheat Flour",
-    "weight": "2KG",
-    "category": ["atta"],
-    "micronutrients": ["iron", "zinc", "protein"],
-    "description": "Nutritious atta for your daily roti – enhanced with iron, zinc, and protein.",
-    "keywords": ["atta", "biofortified", "roti", "energy", "iron"]
-  },
-  {
-    "name": "Biofortified Wheat Flour",
-    "weight": "5KG",
-    "category": ["atta"],
-    "micronutrients": ["iron", "zinc", "protein"],
-    "description": "Economical and nutrient-rich atta for families, packed with daily nutrition.",
-    "keywords": ["atta", "biofortified", "family pack", "iron", "zinc"]
-  },
-  {
-    "name": "Regular Daliya",
-    "weight": "1KG",
-    "category": ["daliya"],
-    "micronutrients": [],
-    "description": "Traditional daliya – a good source of fiber, but not biofortified.",
-    "keywords": ["daliya", "basic", "regular"]
-  },
-  {
-    "name": "Daliya",
-    "weight": "2KG",
-    "category": ["daliya"],
-    "micronutrients": [],
-    "description": "Family pack of regular daliya – a basic fiber source.",
-    "keywords": ["daliya", "2kg", "non-fortified"]
-  },
-  {
-    "name": "Daliya",
-    "weight": "5KG",
-    "category": ["daliya"],
-    "micronutrients": [],
-    "description": "Bulk pack daliya for large households – not fortified.",
-    "keywords": ["daliya", "bulk", "family"]
+    "name": "Daliya Product",
+    "weight": "5kg",
+    "type": "daliya",
+    "benefits": "Perfect for families — helps meet daily iron and fiber needs."
   },
   {
     "name": "Multigrain Atta",
-    "weight": "1KG",
-    "category": ["atta", "multigrain"],
-    "micronutrients": ["fiber", "protein", "iron"],
-    "description": "Wholesome multigrain flour rich in protein, iron and fiber – ideal for energy and gut health.",
-    "keywords": ["multigrain", "atta", "biofortified", "roti", "fiber"]
+    "weight": "1kg",
+    "type": "atta",
+    "benefits": "Combines multiple grains to boost protein, zinc, and fiber."
   }
 ]
