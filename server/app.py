@@ -31,8 +31,9 @@ def analyze():
 
     # Prepare product text
     product_text = "\n".join(
-        [f"- {p['name']} ({', '.join(p['variants'])}): {p['benefits']}" for p in PRODUCTS]
+    [f"- {p['name']} ({p['weight']}): {p['benefits']}" for p in PRODUCTS]
     )
+
 
     prompt = f"""
 You are an AI Nutritionist helping users understand possible micronutrient deficiencies and how their diet can improve with biofortified foods.
