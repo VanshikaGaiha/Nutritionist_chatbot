@@ -1,50 +1,65 @@
 [
   {
-    "name": "Biofortified Rice",
-    "weight": "2kg",
-    "type": "rice",
-    "benefits": "Rich in iron and zinc to combat fatigue and support immune health."
+    "category": "Biofortified Flour",
+    "name": "Biofortified Atta / Flour",
+    "variants": ["2kg"],
+    "price": 200,
+    "benefits": "Rich in iron and zinc, supports energy and muscle repair."
   },
   {
-    "name": "Biofortified Wheat Flour",
-    "weight": "2kg",
-    "type": "atta",
-    "benefits": "Naturally higher in iron and protein for sustained energy and muscle repair."
+    "category": "Biofortified Flour",
+    "name": "Biofortified Ragi Atta / Finger Millet Flour",
+    "variants": ["2kg"],
+    "price": 170,
+    "benefits": "Good source of calcium, iron, and fiber for bone and gut health."
   },
   {
-    "name": "Biofortified Wheat Flour",
-    "weight": "5kg",
-    "type": "atta",
-    "benefits": "Good for families looking to boost daily iron and zinc intake easily."
+    "category": "Biofortified Flour",
+    "name": "Biofortified Bajra Atta / Pearl Millet Flour",
+    "variants": ["2kg"],
+    "price": 150,
+    "benefits": "Supports immunity and energy with natural iron and magnesium."
   },
   {
-    "name": "Biofortified Broken Wheat (Daliya)",
-    "weight": "1kg",
-    "type": "daliya",
-    "benefits": "Great source of fiber, iron, and magnesium for digestion and energy."
+    "category": "Biofortified Grains",
+    "name": "Biofortified Chawal / Rice",
+    "variants": ["2kg"],
+    "price": 379,
+    "benefits": "Fortified with iron and zinc, helps reduce fatigue and improve stamina."
   },
   {
-    "name": "Biofortified Daliya",
-    "weight": "1kg",
-    "type": "daliya",
-    "benefits": "Provides long-lasting energy and supports gut health naturally."
+    "category": "Biofortified Grains",
+    "name": "Biofortified Brown Rice",
+    "variants": ["2kg"],
+    "price": 350,
+    "benefits": "Rich in fiber, iron and antioxidants, good for digestion and energy."
   },
   {
-    "name": "Daliya Product",
-    "weight": "2kg",
-    "type": "daliya",
-    "benefits": "A staple for micronutrient-rich, easy-to-digest meals."
+    "category": "Biofortified Grains",
+    "name": "Arhar Dal",
+    "variants": ["1kg"],
+    "price": 250,
+    "benefits": "Natural protein and iron source, supports energy and muscle strength."
   },
   {
-    "name": "Daliya Product",
-    "weight": "5kg",
-    "type": "daliya",
-    "benefits": "Perfect for families — helps meet daily iron and fiber needs."
+    "category": "Biofortified Staples",
+    "name": "Biofortified Macaroni / Wheat Pasta",
+    "variants": ["1 pack"],
+    "price": 80,
+    "benefits": "Kid-friendly and iron-rich for easy, tasty nutrition."
   },
   {
-    "name": "Multigrain Atta",
-    "weight": "1kg",
-    "type": "atta",
-    "benefits": "Combines multiple grains to boost protein, zinc, and fiber."
+    "category": "Biofortified Staples",
+    "name": "Biofortified Fusilli / Wheat Pasta",
+    "variants": ["1 pack"],
+    "price": 150,
+    "benefits": "Packed with iron and zinc, supports immune health and vitality."
+  },
+  {
+    "category": "Biofortified Staples",
+    "name": "Biofortified Daliya / Broken Wheat",
+    "variants": ["1kg"],
+    "price": 125,
+    "benefits": "High in fiber and naturally enriched with iron, aids digestion and stamina."
   }
 ]
