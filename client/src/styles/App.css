@@ -217,3 +217,32 @@ body {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.header-logo {
+  height: 60px;
+  width: auto;
+}
+
+.header-text {
+  text-align: left;
+}
+
+.header-text h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+  background: linear-gradient(135deg, #3D5C45 0%, #5B8C5A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.header-text p {
+  font-size: 1rem;
+  color: #666;
+}
