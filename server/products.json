@@ -2,6 +2,13 @@
   {
     "category": "Biofortified Flour",
     "name": "Biofortified Atta / Flour",
+    "variants": ["5kg"],
+    "price": 500,
+    "benefits": "Rich in iron and zinc, supports energy and muscle repair."
+  },
+  {
+    "category": "Biofortified Flour",
+    "name": "Biofortified Atta / Flour",
     "variants": ["2kg"],
     "price": 200,
     "benefits": "Rich in iron and zinc, supports energy and muscle repair."
@@ -25,6 +32,13 @@
     "name": "Biofortified Chawal / Rice",
     "variants": ["2kg"],
     "price": 379,
+    "benefits": "Fortified with iron and zinc, helps reduce fatigue and improve stamina."
+  },
+  {
+    "category": "Biofortified Grains",
+    "name": "Biofortified Chawal / Rice",
+    "variants": ["5kg"],
+    "price": 765,
     "benefits": "Fortified with iron and zinc, helps reduce fatigue and improve stamina."
   },
   {
