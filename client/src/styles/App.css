@@ -170,9 +170,22 @@ body {
   font-size: 0.95rem;
   line-height: 1.4;
   resize: none;
-  max-height: 120px;
-  min-height: 20px;
+
+  /* 🔧 New scroll and height control */
+  min-height: 38px;           /* fits ~1 line */
+  max-height: 80px;           /* limits to ~2-3 lines */
+  overflow-y: auto;           /* scrolls if longer */
+  padding-right: 4px;
 }
+
+.message-input::-webkit-scrollbar {
+  width: 4px;
+}
+.message-input::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
 .message-input::placeholder {
   color: #888;
 }

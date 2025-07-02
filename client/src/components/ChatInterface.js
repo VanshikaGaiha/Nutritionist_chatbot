@@ -82,14 +82,21 @@ const ChatInterface = () => {
           <form onSubmit={handleSubmit} className="input-form">
             <div className="input-wrapper">
               <textarea
-                ref={inputRef}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="e.g. I feel tired all the time"
-                className="message-input"
-                rows="1"
-                maxLength={500}
-              />
+                  ref={inputRef}
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="e.g. I feel tired all the time"
+                  className="message-input"
+                  rows="1"
+                  maxLength={500}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();      // Prevents new line
+                      handleSubmit(e);         // Sends message
+                    }
+                  }}
+/>
+
               <button
                 type="submit"
                 className={`send-button ${!inputValue.trim() || isLoading ? 'disabled' : ''}`}
