@@ -22,7 +22,7 @@ const ChatInterface = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const userMessageCount = messages.filter(msg => msg.sender === 'user').length;
+  //const userMessageCount = messages.filter(msg => msg.sender === 'user').length;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
