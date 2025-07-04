@@ -43,18 +43,16 @@ def analyze():
             {
                 "role": "system",
                 "content": (
-                    "You are an empathetic AI Nutritionist specialized in micronutrient deficiencies. "
-                    "Gently make users aware that common symptoms like fatigue, hair loss, or low energy may relate to hidden micronutrient deficiencies. "
-                    "Subtly introduce the benefits of biofortification (foods naturally enhanced with Iron, Zinc, etc.) without sounding forceful.\n\n"
-                    "Reply concisely (max 2-3 lines) with friendly, clear advice.\n\n"
-                    "Always suggest 2-3 clickable follow-up options based on the user's query.\n\n"
-                    "STRICTLY reply ONLY in this JSON format:\n"
+                    "You are a friendly AI Nutritionist. Answer nutrition, health, and diet questions clearly. "
+                    "For symptoms like fatigue, hair loss, or low energy, gently mention possible micronutrient deficiencies. "
+                    "When relevant, explain biofortification (foods naturally enhanced with Iron, Zinc, etc.) in simple terms.\n\n"
+                    "Reply in 2-3 lines with helpful advice. Always provide 2-3 interactive follow-up suggestions.\n\n"
+                    "Try to respond in this JSON format, but if you can't, just give a natural response:\n"
                     "{\n"
-                    "  \"reply\": \"Short reply here.\",\n"
-                    "  \"suggestions\": [\"Suggestion 1\", \"Suggestion 2\", \"Suggestion 3\"]\n"
+                    "  \"reply\": \"Your helpful response here.\",\n"
+                    "  \"suggestions\": [\"Interactive question 1\", \"Follow-up topic 2\", \"Related question 3\"]\n"
                     "}\n\n"
-                    "NEVER add extra words or markdown outside this JSON.\n\n"
-                    f"Here are Better Nutrition's products you can mention if relevant:\n{product_text}"
+                    f"Available products to mention when relevant:\n{product_text}"
                 )
             }
         ]
@@ -79,17 +77,53 @@ def analyze():
         ai_content = response.choices[0].message.content.strip()
         print(f"AI Response: {ai_content}")  # Debug log
 
-        # Parse AI JSON reply safely
+        # Parse AI JSON reply safely with AI-powered fallback
         try:
+            # Try to parse as JSON first
             reply_data = json.loads(ai_content)
+            if "reply" not in reply_data:
+                reply_data["reply"] = ai_content
             if "suggestions" not in reply_data:
                 reply_data["suggestions"] = []
         except json.JSONDecodeError:
-            print(f"JSON Parse Error: {ai_content}")  # Debug log
-            reply_data = {
-                "reply": "Sorry, I couldn't process that. Let's try again!",
-                "suggestions": []
-            }
+            print(f"JSON Parse Error, using AI fallback: {ai_content}")  # Debug log
+            
+            # Use AI to generate proper response structure
+            try:
+                fallback_response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": (
+                                "Convert the following nutritionist response into proper JSON format. "
+                                "Extract the main reply and create 3 relevant follow-up suggestions. "
+                                "Return ONLY valid JSON in this format:\n"
+                                "{\n"
+                                "  \"reply\": \"main response here\",\n"
+                                "  \"suggestions\": [\"suggestion 1\", \"suggestion 2\", \"suggestion 3\"]\n"
+                                "}"
+                            )
+                        },
+                        {
+                            "role": "user",
+                            "content": f"Original user question: {user_msg}\n\nNutritionist response: {ai_content}"
+                        }
+                    ],
+                    temperature=0.3,
+                    max_tokens=300
+                )
+                
+                fallback_content = fallback_response.choices[0].message.content.strip()
+                reply_data = json.loads(fallback_content)
+                
+            except Exception as fallback_error:
+                print(f"Fallback AI call failed: {fallback_error}")
+                # Final fallback - use original response
+                reply_data = {
+                    "reply": ai_content.strip(),
+                    "suggestions": []
+                }
 
         return jsonify(reply_data)
 
