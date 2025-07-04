@@ -11,7 +11,6 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-# Configure OpenAI - Updated to new format
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Load product data with error handling
@@ -22,6 +21,27 @@ except FileNotFoundError:
     print("ERROR: products.json not found!")
     PRODUCTS = []
 
+# Your custom system prompt
+SYSTEM_PROMPT = """You are a knowledgeable nutrition assistant with expertise in micronutrients and emerging agricultural solutions.
+
+CORE KNOWLEDGE:
+- Understand that many symptoms relate to micronutrient deficiencies
+- Know that nutrient absorption from food varies greatly (iron from plants: 2-20%, from meat: 15-35%)
+- Aware that soil depletion affects crop nutrient content
+- Familiar with biofortification as a natural solution where crops are bred/grown to have higher nutrient levels
+- Understand that biofortification allows people to get more nutrients without changing their diet
+
+CONVERSATION STYLE:
+- Be genuinely helpful and educational
+- Connect symptoms to potential nutrient gaps naturally
+- Share interesting facts about nutrition absorption when relevant
+- Introduce biofortification organically when discussing nutrient challenges
+- Use phrases like "recent research shows..." or "nutritionists are finding..."
+- Never sound scripted or salesy
+
+GOAL: Help users understand their symptoms while naturally educating them about biofortification as an innovative solution to common nutritional challenges.
+"""
+
 @app.route("/analyze", methods=["POST"])
 def analyze():
     try:
@@ -29,12 +49,11 @@ def analyze():
         user_msg = data.get("message", "")
         history = data.get("history", [])
 
-        print(f"Received message: {user_msg}")  # Debug log
-        print(f"API Key present: {bool(client.api_key)}")  # Debug log
+        print(f"Received message: {user_msg}")
+        print(f"API Key present: {bool(client.api_key)}")
 
-        # Prepare product text with prices
         product_text = "\n".join([
-            f"- {p['name']} ({', '.join(p['variants'])}, Price: ₹{p['price']}): {p['benefits']}" 
+            f"- {p['name']} ({', '.join(p['variants'])}, Price: ₹{p['price']}): {p['benefits']}"
             for p in PRODUCTS
         ])
 
@@ -42,18 +61,19 @@ def analyze():
         messages = [
             {
                 "role": "system",
-                "content": (
-                    "You are a friendly AI Nutritionist. Answer nutrition, health, and diet questions clearly. "
-                    "For symptoms like fatigue, hair loss, or low energy, gently mention possible micronutrient deficiencies. "
-                    "When relevant, explain biofortification (foods naturally enhanced with Iron, Zinc, etc.) in simple terms.\n\n"
-                    "Reply in 2-3 lines with helpful advice. Always provide 2-3 interactive follow-up suggestions.\n\n"
-                    "Try to respond in this JSON format, but if you can't, just give a natural response:\n"
-                    "{\n"
-                    "  \"reply\": \"Your helpful response here.\",\n"
-                    "  \"suggestions\": [\"Interactive question 1\", \"Follow-up topic 2\", \"Related question 3\"]\n"
-                    "}\n\n"
-                    f"Available products to mention when relevant:\n{product_text}"
-                )
+                "content": f"""{SYSTEM_PROMPT}
+
+Here are Better Nutrition's products you can mention if relevant:
+{product_text}
+
+Reply in 2-3 lines with helpful advice. Always provide 2-3 interactive follow-up suggestions.
+
+Try to respond in this JSON format, but if you can't, just give a natural response:
+{{
+  "reply": "Your helpful response here.",
+  "suggestions": ["Interactive question 1", "Follow-up topic 2", "Related question 3"]
+}}
+"""
             }
         ]
 
@@ -66,7 +86,7 @@ def analyze():
 
         messages.append({"role": "user", "content": user_msg})
 
-        # Updated OpenAI API call
+        # API call
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages,
@@ -75,20 +95,18 @@ def analyze():
         )
 
         ai_content = response.choices[0].message.content.strip()
-        print(f"AI Response: {ai_content}")  # Debug log
+        print(f"AI Response: {ai_content}")
 
-        # Parse AI JSON reply safely with AI-powered fallback
+        # Parse AI JSON reply safely
         try:
-            # Try to parse as JSON first
             reply_data = json.loads(ai_content)
             if "reply" not in reply_data:
                 reply_data["reply"] = ai_content
             if "suggestions" not in reply_data:
                 reply_data["suggestions"] = []
         except json.JSONDecodeError:
-            print(f"JSON Parse Error, using AI fallback: {ai_content}")  # Debug log
-            
-            # Use AI to generate proper response structure
+            print(f"JSON Parse Error, using AI fallback: {ai_content}")
+            # AI fallback attempt
             try:
                 fallback_response = client.chat.completions.create(
                     model="gpt-3.5-turbo",
@@ -113,22 +131,19 @@ def analyze():
                     temperature=0.3,
                     max_tokens=300
                 )
-                
                 fallback_content = fallback_response.choices[0].message.content.strip()
                 reply_data = json.loads(fallback_content)
-                
             except Exception as fallback_error:
                 print(f"Fallback AI call failed: {fallback_error}")
-                # Final fallback - use original response
                 reply_data = {
-                    "reply": ai_content.strip(),
+                    "reply": ai_content,
                     "suggestions": []
                 }
 
         return jsonify(reply_data)
 
     except Exception as e:
-        print(f"ERROR in analyze: {str(e)}")  # Debug log
+        print(f"ERROR in analyze: {str(e)}")
         return jsonify({
             "reply": "Sorry, I'm having trouble processing your request.",
             "suggestions": []
@@ -137,7 +152,7 @@ def analyze():
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({
-        "status": "healthy", 
+        "status": "healthy",
         "service": "AI Nutritionist GPT-3.5 Backend",
         "api_key_present": bool(client.api_key),
         "products_loaded": len(PRODUCTS)
