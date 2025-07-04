@@ -32,8 +32,9 @@ def analyze():
 
     # Prepare product text
     product_text = "\n".join(
-        [f"- {p['name']} ({', '.join(p['variants'])}): {p['benefits']}" for p in PRODUCTS]
-    )
+  [f"- {p['name']} ({', '.join(p['variants'])}, ₹{p['price']}): {p['benefits']}" for p in PRODUCTS]
+)
+
 
     prompt = f"""
     You are an empathetic AI Nutritionist chatbot helping users with their health concerns.
