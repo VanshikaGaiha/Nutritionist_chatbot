@@ -1,22 +1,18 @@
 import os
 import json
-import re
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import google.generativeai as genai
+import openai
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables from .env file
 load_dotenv()
 
-# Setup Flask app
 app = Flask(__name__)
 CORS(app)
 
-# Configure Gemini API
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('models/gemini-1.5-flash')
+# Configure OpenAI
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Load product data
 with open("products.json", "r") as f:
@@ -28,52 +24,64 @@ def analyze():
     user_msg = data.get("message", "")
     history = data.get("history", [])
 
-    formatted_history = "\n".join([f"{m['sender'].capitalize()}: {m['text']}" for m in history])
+    product_text = "\n".join([
+        f"- {p['name']} ({', '.join(p['variants'])}): {p['benefits']}" for p in PRODUCTS
+    ])
 
-    # Prepare product text
-    product_text = "\n".join(
-  [f"- {p['name']} ({', '.join(p['variants'])}, ₹{p['price']}): {p['benefits']}" for p in PRODUCTS]
-)
+    # Build chat history
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are a friendly AI Nutritionist. "
+                "Reply concisely (max 2-3 lines) with practical, friendly suggestions. "
+                "Then suggest 2-3 helpful follow-up buttons the user can click on, based on their message. "
+                "Reply ONLY in this exact JSON format:\n"
+                "{\n"
+                "  \"reply\": \"Short reply here.\",\n"
+                "  \"suggestions\": [\"Suggestion 1\", \"Suggestion 2\", \"Suggestion 3\"]\n"
+                "}\n"
+                "NEVER add extra words or markdown outside this JSON.\n"
+                f"\nHere is your product list:\n{product_text}"
+            )
+        }
+    ]
 
+    # Add past conversation
+    for msg in history:
+        messages.append({
+            "role": "user" if msg["sender"] == "user" else "assistant",
+            "content": msg["text"]
+        })
 
-    prompt = f"""
-    You are an empathetic AI Nutritionist chatbot helping users with their health concerns.
+    messages.append({"role": "user", "content": user_msg})
 
-    Instructions:
-    1. Reply concisely (max 2–3 sentences).
-    2. Suggest 2–3 smart reply options (follow-up questions or answers the user might click on).
-    3. ALWAYS reply in strict JSON format like this:
-    {{
-      "reply": "Short reply here.",
-      "suggestions": ["Suggestion 1", "Suggestion 2", "Suggestion 3"]
-    }}
-    ⚠️ No additional text, no explanations, no markdown — only this JSON response.
+    try:
+        # GPT-3.5 API call
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+            temperature=0.5,
+            max_tokens=400
+        )
 
-    Better Nutrition Products:
-    {product_text}
+        ai_content = response['choices'][0]['message']['content'].strip()
 
-    Conversation so far:
-    {formatted_history}
-    User just said: "{user_msg}"
-    """
-
-    response = model.generate_content(prompt)
-
-    # Auto-extract JSON safely (even if Gemini adds extra text)
-    raw_text = response.text.strip()
-    match = re.search(r'\{.*\}', raw_text, re.DOTALL)
-    if match:
-        json_string = match.group(0)
+        # Parse AI JSON reply safely
         try:
-            reply_data = json.loads(json_string)
+            reply_data = json.loads(ai_content)
+            # Fallback if suggestions missing
+            if "suggestions" not in reply_data:
+                reply_data["suggestions"] = []
         except json.JSONDecodeError:
             reply_data = {
-                "reply": "Sorry, I couldn't understand that. Let's try again.",
+                "reply": "Sorry, I couldn't process that. Let's try again!",
                 "suggestions": []
             }
-    else:
+
+    except Exception as e:
         reply_data = {
-            "reply": "Sorry, I couldn't understand that. Let's try again.",
+            "reply": "Sorry, I'm having trouble reaching the server.",
             "suggestions": []
         }
 
@@ -81,7 +89,7 @@ def analyze():
 
 @app.route("/health", methods=["GET"])
 def health():
-    return jsonify({"status": "healthy", "service": "AI Nutritionist Backend"})
+    return jsonify({"status": "healthy", "service": "AI Nutritionist GPT-3.5 Backend"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)
