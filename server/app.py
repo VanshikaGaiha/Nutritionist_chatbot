@@ -32,8 +32,10 @@ def analyze():
         print(f"Received message: {user_msg}")  # Debug log
         print(f"API Key present: {bool(openai.api_key)}")  # Debug log
 
+        # Prepare product text with prices
         product_text = "\n".join([
-            f"- {p['name']} ({', '.join(p['variants'])}): {p['benefits']}" for p in PRODUCTS
+            f"- {p['name']} ({', '.join(p['variants'])}, Price: ₹{p['price']}): {p['benefits']}" 
+            for p in PRODUCTS
         ])
 
         # Build chat history
@@ -41,16 +43,18 @@ def analyze():
             {
                 "role": "system",
                 "content": (
-                    "You are a friendly AI Nutritionist. "
-                    "Reply concisely (max 2-3 lines) with practical, friendly suggestions. "
-                    "Then suggest 2-3 helpful follow-up buttons the user can click on, based on their message. "
-                    "Reply ONLY in this exact JSON format:\n"
+                    "You are an empathetic AI Nutritionist specialized in micronutrient deficiencies. "
+                    "Gently make users aware that common symptoms like fatigue, hair loss, or low energy may relate to hidden micronutrient deficiencies. "
+                    "Subtly introduce the benefits of biofortification (foods naturally enhanced with Iron, Zinc, etc.) without sounding forceful.\n\n"
+                    "Reply concisely (max 2-3 lines) with friendly, clear advice.\n\n"
+                    "Always suggest 2-3 clickable follow-up options based on the user’s query.\n\n"
+                    "STRICTLY reply ONLY in this JSON format:\n"
                     "{\n"
                     "  \"reply\": \"Short reply here.\",\n"
                     "  \"suggestions\": [\"Suggestion 1\", \"Suggestion 2\", \"Suggestion 3\"]\n"
-                    "}\n"
-                    "NEVER add extra words or markdown outside this JSON.\n"
-                    f"\nHere is your product list:\n{product_text}"
+                    "}\n\n"
+                    "NEVER add extra words or markdown outside this JSON.\n\n"
+                    f"Here are Better Nutrition's products you can mention if relevant:\n{product_text}"
                 )
             }
         ]
@@ -78,7 +82,6 @@ def analyze():
         # Parse AI JSON reply safely
         try:
             reply_data = json.loads(ai_content)
-            # Fallback if suggestions missing
             if "suggestions" not in reply_data:
                 reply_data["suggestions"] = []
         except json.JSONDecodeError:
