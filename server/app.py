@@ -2,7 +2,7 @@ import os
 import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import openai
+from openai import OpenAI
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -11,8 +11,8 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-# Configure OpenAI
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Configure OpenAI - Updated to new format
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Load product data with error handling
 try:
@@ -30,7 +30,7 @@ def analyze():
         history = data.get("history", [])
 
         print(f"Received message: {user_msg}")  # Debug log
-        print(f"API Key present: {bool(openai.api_key)}")  # Debug log
+        print(f"API Key present: {bool(client.api_key)}")  # Debug log
 
         # Prepare product text with prices
         product_text = "\n".join([
@@ -47,7 +47,7 @@ def analyze():
                     "Gently make users aware that common symptoms like fatigue, hair loss, or low energy may relate to hidden micronutrient deficiencies. "
                     "Subtly introduce the benefits of biofortification (foods naturally enhanced with Iron, Zinc, etc.) without sounding forceful.\n\n"
                     "Reply concisely (max 2-3 lines) with friendly, clear advice.\n\n"
-                    "Always suggest 2-3 clickable follow-up options based on the user’s query.\n\n"
+                    "Always suggest 2-3 clickable follow-up options based on the user's query.\n\n"
                     "STRICTLY reply ONLY in this JSON format:\n"
                     "{\n"
                     "  \"reply\": \"Short reply here.\",\n"
@@ -68,15 +68,15 @@ def analyze():
 
         messages.append({"role": "user", "content": user_msg})
 
-        # GPT-3.5 API call
-        response = openai.ChatCompletion.create(
+        # Updated OpenAI API call
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages,
             temperature=0.5,
             max_tokens=400
         )
 
-        ai_content = response['choices'][0]['message']['content'].strip()
+        ai_content = response.choices[0].message.content.strip()
         print(f"AI Response: {ai_content}")  # Debug log
 
         # Parse AI JSON reply safely
@@ -105,12 +105,12 @@ def health():
     return jsonify({
         "status": "healthy", 
         "service": "AI Nutritionist GPT-3.5 Backend",
-        "api_key_present": bool(openai.api_key),
+        "api_key_present": bool(client.api_key),
         "products_loaded": len(PRODUCTS)
     })
 
 if __name__ == "__main__":
     print("Starting server...")
-    print(f"API Key present: {bool(openai.api_key)}")
+    print(f"API Key present: {bool(client.api_key)}")
     print(f"Products loaded: {len(PRODUCTS)}")
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)
