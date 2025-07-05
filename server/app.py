@@ -58,6 +58,7 @@ Always reply in this JSON format:
   "reply": "Short reply here",
   "suggestions": ["Suggestion 1", "Suggestion 2", "Suggestion 3"]
 }}
+Do NOT include any explanations or text outside this JSON. Do not write any extra words.
 """
 
         # Build API message chain
