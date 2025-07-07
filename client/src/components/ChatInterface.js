@@ -7,7 +7,7 @@ const ChatInterface = () => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! I'm your AI Nutritionist. Describe your health symptoms (like fatigue, hair loss, low energy) and I’ll suggest possible deficiencies and food-based solutions.",
+      text: "Hello! I'm your AI Nutritionist. Describe your health symptoms (like fatigue, hair loss, low energy) and I'll suggest possible deficiencies and food-based solutions.",
       sender: 'ai',
       timestamp: new Date()
     }
@@ -37,8 +37,8 @@ const ChatInterface = () => {
     setIsLoading(true);
 
     try {
-      const history = [...messages, userMessage].map(({ sender, text }) => ({ sender, text }));
-      const response = await sendMessage(userMessage.text, history);
+      // No history parameter - backend handles session management
+      const response = await sendMessage(userMessage.text);
       const aiMessage = {
         id: Date.now() + 1,
         text: response.reply,
@@ -73,8 +73,8 @@ const ChatInterface = () => {
     setIsLoading(true);
 
     try {
-      const history = [...messages, userMessage].map(({ sender, text }) => ({ sender, text }));
-      const response = await sendMessage(suggestion, history);
+      // No history parameter - backend handles session management
+      const response = await sendMessage(suggestion);
       const aiMessage = {
         id: Date.now() + 1,
         text: response.reply,

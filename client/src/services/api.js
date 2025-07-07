@@ -1,19 +1,21 @@
 // client/src/services/api.js
 
-// Store session per browser/tab using sessionStorage
-const getSessionId = () => sessionStorage.getItem('nutritionist_session_id');
-const setSessionId = (id) => sessionStorage.setItem('nutritionist_session_id', id);
+// Store session per browser/tab using in-memory storage
+let sessionId = null;
 
-export const sendMessage = async (newMessage, history) => {
+const getSessionId = () => sessionId;
+const setSessionId = (id) => { sessionId = id; };
+
+export const sendMessage = async (newMessage, history = []) => {
   try {
     const response = await fetch("https://nutritionist-chatbot-backend.onrender.com/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
         message: newMessage, 
-        history: history,
-        session_id: getSessionId(),  // Get session ID from browser storage
-        use_session: true            // Enable session management
+        history: history, // Keep for backward compatibility, but won't be used by backend when session is active
+        session_id: getSessionId(),
+        use_session: true
       }),
     });
 
@@ -22,12 +24,12 @@ export const sendMessage = async (newMessage, history) => {
     }
 
     const data = await response.json();
-
+    
     // Store session ID from response for future requests
     if (data.session_id) {
       setSessionId(data.session_id);
     }
-
+    
     return data;
   } catch (error) {
     console.error('API Error:', error);
@@ -37,10 +39,10 @@ export const sendMessage = async (newMessage, history) => {
 
 // Function to reset session (for new conversations)
 export const resetSession = () => {
-  sessionStorage.removeItem('nutritionist_session_id');
+  sessionId = null;
 };
 
-// Function to get current session ID
+// Function to get current session info
 export const getCurrentSessionId = () => {
   return getSessionId();
 };
