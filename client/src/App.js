@@ -9,10 +9,6 @@ function App() {
       <header className="app-header">
         <div className="header-content">
           <img src={logo} alt="Better Nutrition" className="header-logo" />
-          <div className="header-text">
-            <h1>AI Nutritionist</h1>
-            <p>Begins With Better Seeds</p>
-          </div>
         </div>
       </header>
       <main className="app-main">
