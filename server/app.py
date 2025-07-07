@@ -19,7 +19,7 @@ if not os.getenv("OPENAI_API_KEY"):
 
 app = Flask(__name__)
 CORS(app, resources={
-    r"/analyze": {"origins": ["http://localhost:3000", "https://nutritionist-chatbot-frontend.onrender.com/"]},
+    r"/analyze": {"origins": ["http://localhost:3000", "https://nutritionist-chatbot-frontend.onrender.com"]},
     r"/health": {"origins": "*"}
 })
 
