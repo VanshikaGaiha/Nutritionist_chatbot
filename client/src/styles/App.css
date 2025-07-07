@@ -16,10 +16,10 @@ body {
   min-height: 100vh;
 }
 
-/* Header */
+/* Header - Bigger Logo Version with Minimal White Space */
 .app-header {
   background: rgba(255, 255, 255, 0.95);
-  padding: 1rem 0;
+  padding: 0.25rem 0; /* Minimal padding */
   text-align: center;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
@@ -27,26 +27,36 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 1.5rem;
+  max-height: 220px; /* Increased for even bigger logo */
+  overflow: hidden;
+  padding: 0 1rem; /* Minimal horizontal padding */
 }
 .header-logo {
-  height: 140px;
+  height: 200px; /* Even bigger logo */
   width: auto;
+  flex-shrink: 0;
+  margin: 0; /* Remove any default margins */
 }
 .header-text {
   text-align: left;
+  flex-shrink: 1;
+  margin: 0; /* Remove margins */
 }
 .header-text h1 {
-  font-size: 1.8rem;
+  font-size: 2.2rem; /* Bigger text to match larger logo */
   font-weight: 700;
-  margin-bottom: 0.2rem;
+  margin: 0 0 0.1rem 0; /* Minimal bottom margin */
   background: linear-gradient(135deg, #3D5C45 0%, #5B8C5A 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  line-height: 1.1; /* Very tight line height */
 }
 .header-text p {
-  font-size: 1rem;
+  font-size: 1.15rem; /* Bigger to match */
   color: #666;
+  line-height: 1.2;
+  margin: 0;
 }
 
 /* Main */
