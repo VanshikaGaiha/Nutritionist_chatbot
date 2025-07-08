@@ -25,7 +25,7 @@ CORS(app, resources={
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Load product data safely
+# Load product data
 try:
     with open("products.json", "r") as f:
         PRODUCTS = json.load(f)
@@ -37,40 +37,31 @@ if not PRODUCTS:
     logger.warning("No products loaded - running in demo mode")
 
 def process_history(history):
-    """Process and validate conversation history"""
     if not history or not isinstance(history, list):
         return []
     
     processed_messages = []
-    total_tokens = 0  # Rough estimate
-    
-    for msg in reversed(history[-10:]):  # Last 10 messages, reversed for recency
+    total_tokens = 0
+
+    for msg in reversed(history[-10:]):
         try:
-            # Handle different possible formats
             text = msg.get("message") or msg.get("text") or ""
             sender = msg.get("sender") or msg.get("role") or "user"
-            
             if not text.strip():
                 continue
-                
-            # Normalize sender names
             role = "user" if sender.lower() in ["user", "human"] else "assistant"
-            
-            # Rough token estimation (4 chars = ~1 token)
             estimated_tokens = len(text) // 4
-            if total_tokens + estimated_tokens > 1500:  # Leave room for system prompt
+            if total_tokens + estimated_tokens > 1500:
                 break
-                
             processed_messages.append({
                 "role": role,
                 "content": text.strip()
             })
             total_tokens += estimated_tokens
-            
         except (KeyError, TypeError, AttributeError):
-            continue  # Skip malformed messages
-    
-    return list(reversed(processed_messages))  # Restore chronological order
+            continue
+
+    return list(reversed(processed_messages))
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
@@ -79,56 +70,51 @@ def analyze():
         user_msg = data.get("message", "")
         history = data.get("history", [])
 
-        # Input validation
         if not user_msg or not user_msg.strip():
             return jsonify({"error": "Message cannot be empty"}), 400
-        
-        if len(user_msg) > 1000:  # Prevent abuse
+
+        if len(user_msg) > 1000:
             return jsonify({"error": "Message too long"}), 400
-        
+
         if history and not isinstance(history, list):
             return jsonify({"error": "Invalid history format"}), 400
 
-        # Process history
         processed_history = process_history(history)
-        logger.info(f"Processing {len(history)} history messages")
         logger.info(f"Processed {len(processed_history)} valid messages")
 
-        # Prepare product list with pricing
         product_text = "\n".join([
             f"- {p['name']}: Rich in {p['benefits']} - ₹{p.get('price', 'N/A')}" for p in PRODUCTS
         ])
 
-        # Optimized System Prompt
-        SYSTEM_PROMPT = f"""You are an AI Nutritionist. Help users with symptoms like fatigue, hair loss by suggesting food sources and nutrients.
+        # ✅ Updated system prompt — no suggestions, natural guidance
+        SYSTEM_PROMPT = f"""
+You are a helpful, friendly AI Nutritionist designed to assist users with their dietary symptoms.
 
-RULES:
-- Give both conventional foods AND biofortified options when relevant
-- Ask about dietary preferences (veg/non-veg)  
-- Provide specific prices from product list when asked
-- Keep responses short (2-3 sentences)
-- Educate about biofortification naturally
+🎯 Your goals:
+- Identify possible micronutrient deficiencies based on symptoms (e.g., fatigue, hair loss, low stamina)
+- Provide food-based solutions first (natural diet, conventional foods)
+- Gently introduce biofortification only if relevant — do not push it
+- Mention Better Nutrition products naturally if the user seems interested
+- Keep replies short (2–3 sentences), friendly, and actionable
 
-SUGGESTIONS MUST BE:
-- Specific to user's symptom/question
-- Actionable next steps
-- Mix of food advice, product info, and health tips
+🛍️ If recommending a product, include its benefit and price like this:
+  "You could also try our Biofortified Ragi Atta (₹170), which supports bone and gut health."
 
-Products: {product_text}
+🧠 Style guide:
+- Warm, conversational tone — no robotic or overly formal responses
+- Avoid any JSON, bullet points, or formatting
+- Do not include follow-up suggestions or prompts
 
-Always respond in JSON:
-{{
-  "reply": "Short helpful response",
-  "suggestions": ["Specific follow-up 1", "Specific follow-up 2", "Specific follow-up 3"]
-}}
+🛒 Product List:
+{product_text}
+
+Respond ONLY in plain text. One friendly response per user message. No JSON, no markdown, no lists.
 """
 
-        # Build API message chain
         messages = [{"role": "system", "content": SYSTEM_PROMPT}]
         messages.extend(processed_history)
         messages.append({"role": "user", "content": user_msg})
 
-        # GPT Call with timeout
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages,
@@ -140,35 +126,7 @@ Always respond in JSON:
         ai_content = response.choices[0].message.content.strip()
         logger.info(f"AI Response: {ai_content}")
 
-        # Improved JSON Parsing
-        try:
-            # Try to extract JSON if wrapped in markdown
-            if '```json' in ai_content:
-                json_start = ai_content.find('{')
-                json_end = ai_content.rfind('}') + 1
-                ai_content = ai_content[json_start:json_end]
-            
-            reply_data = json.loads(ai_content)
-            
-            # Validate required fields
-            if not isinstance(reply_data.get("reply"), str):
-                raise ValueError("Invalid reply format")
-            if not isinstance(reply_data.get("suggestions"), list):
-                reply_data["suggestions"] = []
-                
-        except (json.JSONDecodeError, ValueError) as e:
-            logger.warning(f"JSON Parse Error: {e}")
-            # Better fallback with contextual suggestions
-            reply_data = {
-                "reply": ai_content.replace('```json', '').replace('```', '').strip(),
-                "suggestions": [
-                    "What's your current diet like?", 
-                    "Any other symptoms?", 
-                    "Tell me about your food preferences"
-                ]
-            }
-
-        return jsonify(reply_data)
+        return jsonify({"reply": ai_content})
 
     except Exception as e:
         if "openai" in str(type(e)).lower():
