@@ -34,7 +34,7 @@ CORS(app, resources={
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Load product data safely
+# Load product data
 try:
     with open("products.json", "r") as f:
         PRODUCTS = json.load(f)
@@ -157,40 +157,31 @@ def get_or_create_session(session_id=None):
     return new_session_id, SESSIONS[new_session_id]
 
 def process_history(history):
-    """Process and validate conversation history"""
     if not history or not isinstance(history, list):
         return []
     
     processed_messages = []
-    total_tokens = 0  # Rough estimate
-    
-    for msg in reversed(history[-10:]):  # Last 10 messages, reversed for recency
+    total_tokens = 0
+
+    for msg in reversed(history[-10:]):
         try:
-            # Handle different possible formats
             text = msg.get("message") or msg.get("text") or ""
             sender = msg.get("sender") or msg.get("role") or "user"
-            
             if not text.strip():
                 continue
-                
-            # Normalize sender names
             role = "user" if sender.lower() in ["user", "human"] else "assistant"
-            
-            # Rough token estimation (4 chars = ~1 token)
             estimated_tokens = len(text) // 4
-            if total_tokens + estimated_tokens > 1500:  # Leave room for system prompt
+            if total_tokens + estimated_tokens > 1500:
                 break
-                
             processed_messages.append({
                 "role": role,
                 "content": text.strip()
             })
             total_tokens += estimated_tokens
-            
         except (KeyError, TypeError, AttributeError):
-            continue  # Skip malformed messages
-    
-    return list(reversed(processed_messages))  # Restore chronological order
+            continue
+
+    return list(reversed(processed_messages))
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
@@ -201,47 +192,51 @@ def analyze():
         session_id = data.get("session_id")
         use_session = data.get("use_session", True)
 
-        # Input validation
         if not user_msg or not user_msg.strip():
             return jsonify({"error": "Message cannot be empty"}), 400
-        
-        if len(user_msg) > 1000:  # Prevent abuse
+
+        if len(user_msg) > 1000:
             return jsonify({"error": "Message too long"}), 400
-        
+
         if history and not isinstance(history, list):
             return jsonify({"error": "Invalid history format"}), 400
 
-        # Choose between session-based or traditional approach
-        if use_session:
-            # SESSION-BASED APPROACH
-            session_id, session_data = get_or_create_session(session_id)
-            
-            # Add user message to session
-            session_data['messages'].append({
-                "role": "user", 
-                "content": user_msg
-            })
-            session_data['message_count'] += 1
-            
-            # Keep only recent messages (system + last 20 messages)
-            if len(session_data['messages']) > 21:
-                system_msg = session_data['messages'][0]  # Keep system message
-                recent_messages = session_data['messages'][-20:]  # Keep last 20
-                session_data['messages'] = [system_msg] + recent_messages
-            
-            messages = session_data['messages']
-            
-        else:
-            # TRADITIONAL APPROACH (backward compatibility)
-            processed_history = process_history(history)
-            logger.info(f"Processing {len(history)} history messages")
-            logger.info(f"Processed {len(processed_history)} valid messages")
-            
-            messages = [{"role": "system", "content": get_base_system_prompt()}]
-            messages.extend(processed_history)
-            messages.append({"role": "user", "content": user_msg})
+        processed_history = process_history(history)
+        logger.info(f"Processed {len(processed_history)} valid messages")
 
-        # GPT Call with timeout
+        product_text = "\n".join([
+            f"- {p['name']}: Rich in {p['benefits']} - ₹{p.get('price', 'N/A')}" for p in PRODUCTS
+        ])
+
+        # ✅ Updated system prompt — no suggestions, natural guidance
+        SYSTEM_PROMPT = f"""
+You are a helpful, friendly AI Nutritionist designed to assist users with their dietary symptoms.
+
+🎯 Your goals:
+- Identify possible micronutrient deficiencies based on symptoms (e.g., fatigue, hair loss, low stamina)
+- Provide food-based solutions first (natural diet, conventional foods)
+- Gently introduce biofortification only if relevant — do not push it
+- Mention Better Nutrition products naturally if the user seems interested
+- Keep replies short (2–3 sentences), friendly, and actionable
+
+🛍️ If recommending a product, include its benefit and price like this:
+  "You could also try our Biofortified Ragi Atta (₹170), which supports bone and gut health."
+
+🧠 Style guide:
+- Warm, conversational tone — no robotic or overly formal responses
+- Avoid any JSON, bullet points, or formatting
+- Do not include follow-up suggestions or prompts
+
+🛒 Product List:
+{product_text}
+
+Respond ONLY in plain text. One friendly response per user message. No JSON, no markdown, no lists.
+"""
+
+        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+        messages.extend(processed_history)
+        messages.append({"role": "user", "content": user_msg})
+
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages,
@@ -253,47 +248,7 @@ def analyze():
         ai_content = response.choices[0].message.content.strip()
         logger.info(f"AI Response: {ai_content}")
 
-        # Add AI response to session if using session management
-        if use_session:
-            session_data['messages'].append({
-                "role": "assistant",
-                "content": ai_content
-            })
-
-        # Improved JSON Parsing
-        try:
-            # Try to extract JSON if wrapped in markdown
-            if '```json' in ai_content:
-                json_start = ai_content.find('{')
-                json_end = ai_content.rfind('}') + 1
-                ai_content = ai_content[json_start:json_end]
-            
-            reply_data = json.loads(ai_content)
-            
-            # Validate required fields
-            if not isinstance(reply_data.get("reply"), str):
-                raise ValueError("Invalid reply format")
-            if not isinstance(reply_data.get("suggestions"), list):
-                reply_data["suggestions"] = []
-                
-        except (json.JSONDecodeError, ValueError) as e:
-            logger.warning(f"JSON Parse Error: {e}")
-            # Better fallback with contextual suggestions
-            reply_data = {
-                "reply": ai_content.replace('```json', '').replace('```', '').strip(),
-                "suggestions": [
-                    "What's your current diet like?", 
-                    "Any other symptoms?", 
-                    "Tell me about your food preferences"
-                ]
-            }
-
-        # Add session info to response if using sessions
-        if use_session:
-            reply_data["session_id"] = session_id
-            reply_data["message_count"] = session_data['message_count']
-
-        return jsonify(reply_data)
+        return jsonify({"reply": ai_content})
 
     except Exception as e:
         if "openai" in str(type(e)).lower():

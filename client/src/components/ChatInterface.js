@@ -7,7 +7,7 @@ const ChatInterface = () => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! I'm your AI Nutritionist. Describe your health symptoms (like fatigue, hair loss, low energy) and I'll suggest possible deficiencies and food-based solutions.",
+      text: "Hello! I'm your AI Nutritionist. Describe your health symptoms (like fatigue, hair loss, low energy) and I’ll suggest helpful foods or advice.",
       sender: 'ai',
       timestamp: new Date()
     }
@@ -43,44 +43,7 @@ const ChatInterface = () => {
         id: Date.now() + 1,
         text: response.reply,
         sender: 'ai',
-        timestamp: new Date(),
-        suggestions: response.suggestions || []
-      };
-      setMessages(prev => [...prev, aiMessage]);
-    } catch (error) {
-      setMessages(prev => [...prev, {
-        id: Date.now() + 1,
-        text: "Sorry! I'm having trouble reaching the server.",
-        sender: 'ai',
-        isError: true,
         timestamp: new Date()
-      }]);
-    } finally {
-      setIsLoading(false);
-      setTimeout(() => inputRef.current?.focus(), 100);
-    }
-  };
-
-  const handleSuggestionClick = async (suggestion) => {
-    const userMessage = {
-      id: Date.now(),
-      text: suggestion,
-      sender: 'user',
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setIsLoading(true);
-
-    try {
-      // No history parameter - backend handles session management
-      const response = await sendMessage(suggestion);
-      const aiMessage = {
-        id: Date.now() + 1,
-        text: response.reply,
-        sender: 'ai',
-        timestamp: new Date(),
-        suggestions: response.suggestions || []
       };
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
@@ -113,22 +76,7 @@ const ChatInterface = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {messages.length > 0 && messages[messages.length - 1].suggestions?.length > 0 && (
-          <div className="suggestions">
-            {messages[messages.length - 1].suggestions.map((suggestion, index) => (
-              <button
-                key={index}
-                type="button"
-                className="suggestion-button"
-                onClick={() => handleSuggestionClick(suggestion)}
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Shopify Buy Now Button */}
+        {/* Buy Now Button */}
         <a
           href="https://yourshopifystore.com/collections/all"
           className="buy-now-button"
