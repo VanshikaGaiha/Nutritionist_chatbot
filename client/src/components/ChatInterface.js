@@ -37,8 +37,7 @@ const ChatInterface = () => {
     setIsLoading(true);
 
     try {
-      // No history parameter - backend handles session management
-      const response = await sendMessage(userMessage.text);
+      const response = await sendMessage(userMessage.text, [...messages, userMessage]);
       const aiMessage = {
         id: Date.now() + 1,
         text: response.reply,
